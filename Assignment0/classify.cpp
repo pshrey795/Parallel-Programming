@@ -1,4 +1,5 @@
 #include "classify.h"
+#include <algorithm>
 #include <omp.h>
 
 Data classify(Data &D, const Ranges &R, unsigned int numt)
@@ -6,6 +7,21 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
    assert(numt < MAXTHREADS);
    Counter counts[R.num()]; // I need on counter per interval. Each counter can keep pre-thread subcount.
 
+   //Optimization 1
+   /*
+   #pragma omp parallel num_threads(numt)
+   {
+      int tid = omp_get_thread_num();
+      int wnd_size = (D.ndata + numt - 1) / numt;
+      int lo = tid * wnd_size;
+      int hi = std::min((int)D.ndata,(tid + 1) * wnd_size);
+      for(int i=lo;i<hi;i++){
+         int v = D.data[i].value = R.range(D.data[i].key);
+         counts[v].increase(tid);
+      }
+   }*/
+   
+   
    #pragma omp parallel num_threads(numt)
    {
       int tid = omp_get_thread_num(); // I am thread number tid
@@ -16,6 +32,7 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
          counts[v].increase(tid);                          // Found one key in interval v
       }
    }
+   
 
    // Accumulate all sub-counts (in each interval;'s counter) into rangecount
    unsigned int *rangecount = new unsigned int[R.num()];
@@ -37,17 +54,32 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
 
    Data D2 = Data(D.ndata); // Make a copy
 
+   //Optimization 2;
    #pragma omp parallel num_threads(numt)
    {
       int tid = omp_get_thread_num();
-      for (int r = tid; r < R.num(); r += numt)
-      { // Thread together share-loop through the intervals
-         int rcount = 0;
-         for (int d = 0; d < D.ndata; d++)                        // For each interval, thread loops through all of data and
-            if (D.data[d].value == r)                             // If the data item is in this interval
-               D2.data[rangecount[r - 1] + rcount++] = D.data[d]; // Copy it to the appropriate place in D2.
+      int wnd_size = (R.num() + numt - 1) / numt;
+      for(int d=0;d<D.ndata;d++){
+         int r = D.data[d].value;
+         if(r/wnd_size == tid){             
+            int newIdx = rangecount[r-1];
+            D2.data[newIdx] = D.data[d];
+            rangecount[r-1] = rangecount[r-1] + 1;
+         }
       }
    }
+   
+   // #pragma omp parallel num_threads(numt)
+   // {
+   //    int tid = omp_get_thread_num();
+   //    for (int r = tid; r < R.num(); r += numt)
+   //    { // Thread together share-loop through the intervals
+   //       int rcount = 0;
+   //       for (int d = 0; d < D.ndata; d++)                        // For each interval, thread loops through all of data and
+   //          if (D.data[d].value == r)                             // If the data item is in this interval
+   //             D2.data[rangecount[r - 1] + rcount++] = D.data[d]; // Copy it to the appropriate place in D2.
+   //    }
+   // }
 
    return D2;
 }

@@ -182,9 +182,15 @@ struct Data
       for (int i = 0; i < ndata; i++)
          data[i].value = -1;
    }
-   void inspect()
+   void inspect(bool checkSort=false)
    {
-      for (int i = 0; i < ndata; i++)
-         std::cout << i << ": " << data[i].key << " -- " << data[i].value << "\n";
+      if(checkSort){
+         for (int i = 0; i < ndata-1; i++){
+            assert(data[i].value <= data[i+1].value);
+         }  
+      }else{
+         for (int i = 0; i < ndata; i++)
+            std::cout << i << ": " << data[i].key << " -- " << data[i].value << "\n";
+      }
    }
 };
