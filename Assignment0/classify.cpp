@@ -35,20 +35,22 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
    
 
    // Accumulate all sub-counts (in each interval;'s counter) into rangecount
-   unsigned int *rangecount = new unsigned int[R.num()];
-   for (int r = 0; r < R.num(); r++)
+   unsigned int *rangecount = new unsigned int[R.num()+1];
+   rangecount[0] = 0;
+   for (int r = 1; r < R.num(); r++)
    { // For all intervals
-      rangecount[r] = 0;
+      rangecount[r] = rangecount[r-1];
       for (int t = 0; t < numt; t++) // For all threads
-         rangecount[r] += counts[r].get(t);
+         rangecount[r] += counts[r-1].get(t);
       // std::cout << rangecount[r] << " elements in Range " << r << "\n"; // Debugging statement
+
    }
 
-   // Compute prefx sum on rangecount.
-   for (int i = 1; i < R.num(); i++)
-   {
-      rangecount[i] += rangecount[i - 1];
-   }
+   // // Compute prefx sum on rangecount.
+   // for (int i = 1; i <= R.num(); i++)
+   // {
+   //    rangecount[i] += rangecount[i - 1];
+   // }
 
    // Now rangecount[i] has the number of elements in intervals before the ith interval.
 
@@ -62,9 +64,9 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
       for(int d=0;d<D.ndata;d++){
          int r = D.data[d].value;
          if(r/wnd_size == tid){             
-            int newIdx = rangecount[r-1];
+            int newIdx = rangecount[r];
             D2.data[newIdx] = D.data[d];
-            rangecount[r-1] = rangecount[r-1] + 1;
+            rangecount[r] = rangecount[r] + 1;
          }
       }
    }
