@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------
+I1 cache:         32768 B, 64 B, 8-way associative
+D1 cache:         32768 B, 64 B, 8-way associative
+LL cache:         8388608 B, 64 B, 16-way associative
+Command:          ./classify rfile dfile 1009072 8 1
+Data file:        cachegrind.out.1
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Events shown:     Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Event sort order: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Thresholds:       0.1 100 100 100 100 100 100 100 100
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                      I1mr           ILmr           Dr                     D1mr                 DLmr               Dw                  D1mw             DLmw             
+--------------------------------------------------------------------------------
+10,892,089,351 (100.0%) 3,478 (100.0%) 3,292 (100.0%) 2,279,838,850 (100.0%) 127,450,747 (100.0%) 1,186,446 (100.0%) 87,614,811 (100.0%) 702,885 (100.0%) 578,553 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                     I1mr         ILmr         Dr                     D1mr                 DLmr               Dw                  D1mw             DLmw              file:function
+--------------------------------------------------------------------------------
+6,067,562,196 (55.71%)   3 ( 0.09%)   3 ( 0.09%) 1,014,119,458 (44.48%) 126,266,166 (99.07%) 1,005,419 (84.74%)  1,009,144 ( 1.15%) 127,021 (18.07%) 126,954 (21.94%)  /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Original/classify.cpp:classify(Data&, Ranges const&, unsigned int) [clone ._omp_fn.1]
+4,031,538,856 (37.01%)   1 ( 0.03%)   1 ( 0.03%) 1,009,902,850 (44.30%)       9,432 ( 0.01%)       118 ( 0.01%)  1,009,072 ( 1.15%)       0                0           /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Original/classify.h:classify(Data&, Ranges const&, unsigned int) [clone ._omp_fn.0]
+  496,698,649 ( 4.56%)  40 ( 1.15%)  40 ( 1.22%)   164,426,143 ( 7.21%)         350 ( 0.00%)       219 ( 0.02%) 51,879,635 (59.21%)       0                0           ???:std::istreambuf_iterator<char, std::char_traits<char> > std::num_get<char, std::istreambuf_iterator<char, std::char_traits<char> > >::_M_extract_int<long>(std::istreambuf_iterator<char, std::char_traits<char> >, std::istreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, std::_Ios_Iostate&, long&) const
+  112,069,494 ( 1.03%) 624 (17.94%) 614 (18.65%)    35,084,021 ( 1.54%)         583 ( 0.00%)       313 ( 0.03%)  9,101,644 (10.39%)     154 ( 0.02%)     124 ( 0.02%)  ???:???
+   62,687,028 ( 0.58%)   6 ( 0.17%)   6 ( 0.18%)    25,276,949 ( 1.11%)          34 ( 0.00%)        31 ( 0.00%)  7,077,639 ( 8.08%)       0                0           ???:std::istream::sentry::sentry(std::istream&, bool)
+   55,609,012 ( 0.51%)   5 ( 0.14%)   5 ( 0.15%)    17,188,240 ( 0.75%)           0                  0          10,110,730 (11.54%) 126,135 (17.95%)   2,927 ( 0.51%)  ???:std::istream::operator>>(int&)
+   13,039,004 ( 0.12%)   4 ( 0.12%)   4 ( 0.12%)     3,003,999 ( 0.13%)           0                  0           2,008,003 ( 2.29%)  61,876 ( 8.80%)  61,876 (10.69%)  /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Original/classify.h:readRanges(char const*)
+   11,100,016 ( 0.10%)   3 ( 0.09%)   3 ( 0.09%)     3,027,328 ( 0.13%)   1,017,137 ( 0.80%)    45,380 ( 3.82%)  1,009,136 ( 1.15%)      34 ( 0.00%)       7 ( 0.00%)  /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Original/classify.cpp:classify(Data&, Ranges const&, unsigned int) [clone ._omp_fn.0]
+   11,099,824 ( 0.10%)   3 ( 0.09%)   3 ( 0.09%)     2,018,156 ( 0.09%)           2 ( 0.00%)         1 ( 0.00%)  1,009,080 ( 1.15%)       0                0           /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Original/main.cpp:readData(char const*, unsigned int)
+

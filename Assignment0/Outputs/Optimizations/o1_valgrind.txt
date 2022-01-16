@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------
+I1 cache:         32768 B, 64 B, 8-way associative
+D1 cache:         32768 B, 64 B, 8-way associative
+LL cache:         8388608 B, 64 B, 16-way associative
+Command:          ./classify rfile dfile 1009072 4 1
+Data file:        cachegrind.out.1
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Events shown:     Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Event sort order: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Thresholds:       0.1 100 100 100 100 100 100 100 100
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                      I1mr           ILmr           Dr                     D1mr                 DLmr               Dw                  D1mw             DLmw             
+--------------------------------------------------------------------------------
+10,875,227,454 (100.0%) 3,370 (100.0%) 3,167 (100.0%) 2,276,844,629 (100.0%) 126,548,887 (100.0%) 1,156,304 (100.0%) 87,612,606 (100.0%) 702,707 (100.0%) 578,392 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                     I1mr         ILmr         Dr                     D1mr                 DLmr               Dw                  D1mw             DLmw              file:function
+--------------------------------------------------------------------------------
+6,067,562,072 (55.79%)   3 ( 0.09%)   3 ( 0.09%) 1,014,119,410 (44.54%) 126,266,166 (99.78%) 1,004,666 (86.89%)  1,009,108 ( 1.15%) 127,017 (18.08%) 126,992 (21.96%)  /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Modified/classify.cpp:classify(Data&, Ranges const&, unsigned int) [clone ._omp_fn.1]
+4,031,538,852 (37.07%)   1 ( 0.03%)   1 ( 0.03%) 1,009,902,850 (44.36%)       1,604 ( 0.00%)        27 ( 0.00%)  1,009,072 ( 1.15%)       0                0           /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Modified/classify.h:classify(Data&, Ranges const&, unsigned int) [clone ._omp_fn.0]
+  496,698,649 ( 4.57%)  40 ( 1.19%)  40 ( 1.26%)   164,426,143 ( 7.22%)         344 ( 0.00%)       213 ( 0.02%) 51,879,635 (59.21%)       0                0           ???:std::istreambuf_iterator<char, std::char_traits<char> > std::num_get<char, std::istreambuf_iterator<char, std::char_traits<char> > >::_M_extract_int<long>(std::istreambuf_iterator<char, std::char_traits<char> >, std::istreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, std::_Ios_Iostate&, long&) const
+   98,282,774 ( 0.90%) 578 (17.15%) 566 (17.87%)    33,114,152 ( 1.45%)         491 ( 0.00%)       230 ( 0.02%)  9,101,182 (10.39%)     101 ( 0.01%)      73 ( 0.01%)  ???:???
+   62,687,028 ( 0.58%)   6 ( 0.18%)   6 ( 0.19%)    25,276,949 ( 1.11%)          42 ( 0.00%)        38 ( 0.00%)  7,077,639 ( 8.08%)       0                0           ???:std::istream::sentry::sentry(std::istream&, bool)
+   55,609,012 ( 0.51%)   5 ( 0.15%)   5 ( 0.16%)    17,188,240 ( 0.75%)           0                  0          10,110,730 (11.54%) 126,135 (17.95%)   2,899 ( 0.50%)  ???:std::istream::operator>>(int&)
+   13,039,004 ( 0.12%)   4 ( 0.12%)   4 ( 0.13%)     3,003,999 ( 0.13%)           0                  0           2,008,003 ( 2.29%)  61,876 ( 8.81%)  61,876 (10.70%)  /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Modified/classify.h:readRanges(char const*)
+   11,099,824 ( 0.10%)   3 ( 0.09%)   3 ( 0.09%)     2,018,156 ( 0.09%)           2 ( 0.00%)         1 ( 0.00%)  1,009,080 ( 1.15%)       0                0           /home/shrey/Desktop/Parallel Programming/Parallel-Programming/Assignment0/Modified/main.cpp:readData(char const*, unsigned int)
+

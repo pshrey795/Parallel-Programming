@@ -1,0 +1,4 @@
+343.136 ms
+354.098 ms
+326.828 ms
+3 iterations of 1009072 items in 1001 ranges with 8 threads: Fastest took 326.828 ms, Average was 341.354 ms

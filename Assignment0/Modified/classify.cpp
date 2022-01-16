@@ -20,7 +20,7 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
       }
    }
    
-   
+   // // First loop before optimization
    // #pragma omp parallel num_threads(numt)
    // {
    //    int tid = omp_get_thread_num(); // I am thread number tid
@@ -32,7 +32,8 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
    //    }
    // }
    
-
+   // Changing definition of rangecount for optimization 2
+   // Here, rangecount[r] would store the number of data items smaller than rth range(not including items of range r)
    // Accumulate all sub-counts (in each interval;'s counter) into rangecount
    unsigned int *rangecount = new unsigned int[R.num()+1];
    rangecount[0] = 0;
@@ -42,20 +43,25 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
       for (int t = 0; t < numt; t++) // For all threads
          rangecount[r] += counts[r-1].get(t);
       // std::cout << rangecount[r] << " elements in Range " << r << "\n"; // Debugging statement
-
    }
 
-   // // Compute prefx sum on rangecount.
-   // for (int i = 1; i <= R.num(); i++)
-   // {
-   //    rangecount[i] += rangecount[i - 1];
+   // // Accumulate all sub-counts (in each interval;'s counter) into rangecount
+   // // Here, rangecount[r] would store the number of data items smaller or in the rth range
+   // unsigned int *rangecount = new unsigned int[R.num()];
+   // for(int r=0; r<R.num(); r++) { // For all intervals
+   //    rangecount[r] = 0;
+   //    for(int t=0; t<numt; t++) // For all threads
+   //       rangecount[r] += counts[r].get(t);
+   //    // std::cout << rangecount[r] << " elements in Range " << r << "\n"; // Debugging statement
    // }
-
-   // Now rangecount[i] has the number of elements in intervals before the ith interval.
+   // // Compute prefx sum on rangecount.
+   // for(int i=1; i<R.num(); i++) {
+   //    rangecount[i] += rangecount[i-1];
+   // }
 
    Data D2 = Data(D.ndata); // Make a copy
 
-   //Optimization 2;
+   // Optimization 2;
    #pragma omp parallel num_threads(numt)
    {
       int tid = omp_get_thread_num();
@@ -63,7 +69,7 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
       int lo = tid * wnd_size;
       int hi = std::min((int)R.num(),(tid + 1) * wnd_size);
 
-      //Using local counts
+      //Using local counts(optimization 3)
       int localCount[hi-lo];
       for(int i=lo;i<hi;i++)
          localCount[i-lo] = rangecount[i];
@@ -75,7 +81,7 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
          }
       }
 
-      // //Using global rangecount
+      // //Using global rangecount(to be used before optimization 2)
       // for(int d=0;d<D.ndata;d++){
       //    int r = D.data[d].value;
       //    if(r/wnd_size == tid){             
@@ -84,9 +90,8 @@ Data classify(Data &D, const Ranges &R, unsigned int numt)
       //    }
       // }
    }
-
-   //Optimization 3
    
+   // // Second loop before optimization
    // #pragma omp parallel num_threads(numt)
    // {
    //    int tid = omp_get_thread_num();
