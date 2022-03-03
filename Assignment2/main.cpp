@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#define MIN_THREADS 16
+#define MIN_THREADS 2
 
 vector<vector<int>> graph;
 vector<vector<pair<int,int>>> recommendations;
@@ -23,7 +23,7 @@ void processInput(string inputFile, int n, int m){
     }
 
     //Reading big endian input file
-    ifstream file(inputFile, ios::binary);
+    ifstream file(inputFile, ios::binary | ios::in);
     if(!file.is_open()){
         cout<<"Input File Error\n";
         exit(1);
@@ -35,33 +35,13 @@ void processInput(string inputFile, int n, int m){
             int dest = (int)buffer[4] << 24 | (int)buffer[5] << 16 | (int)buffer[6] << 8 | (int)buffer[7];
             graph[src].push_back(dest);
         }
-        delete[] buffer;
-    }
-    file.close();
-}
-
-//Called by master thread to initialise the output file so that the indexed writing has no issues
-void initialiseOutput(int n, int r, string outputFile){
-    //Create a file and write to it
-    ofstream file(outputFile, ios::binary);
-    if(!file.is_open()){
-        cout<<"Output File Error\n";
-        exit(1);
-    }else{
-        int num = n * (1 + 2*r);
-        unsigned char buffer[num];
-        for(int i=0;i<num;i++){
-            buffer[i] = 0;
-        }
-        file.write((char*)buffer, num);
     }
     file.close();
 }
 
 //Every thread outputs its own processed nodes at the proper offset in the output file
-void processOutput(int num_nodes,int num_rec,string outputFile){
+void processOutput(int num_nodes,int num_rec,ofstream& file){
     //Writing to output is done in parallel which means each process writes to that node rows which it processed 
-    ofstream file(outputFile, ios::binary);
     for(int i=0;i<processedNodes.size();i++){
         int currentNode = processedNodes[i];
         int writeOffset = currentNode * (4 * (1 + 2 * num_rec));
@@ -101,27 +81,12 @@ void processOutput(int num_nodes,int num_rec,string outputFile){
                 file.write(buffer, 4);
             }
         }
-
-        delete[] buffer;
     }
-    file.close();
 }
 
-//Custom binary search to decide if a particular node j is a child of node i
-bool search(int i,int j){
-    int low = 0;
-    int high = graph[i].size() - 1;
-    while(low <= high){
-        int mid = (low + high) / 2;
-        if(graph[i][mid] == j){
-            return true;
-        }else if(graph[i][mid] < j){
-            low = mid + 1;
-        }else{
-            high = mid - 1;
-        }
-    }
-    return false;
+void processTextOutput(int num_nodes,int num_rec,string outputFile){
+    ofstream file(outputFile, ios::out | ios::trunc);
+
 }
 
 //Custom sort function to sort the recommendations in descending order
@@ -144,9 +109,6 @@ void RWR(int nodeID, int num_walks, int num_steps, int num_rec, Randomizer r){
             int step_num = 0;
             currentNode = graph[nodeID][j];
             while(step_num < num_steps){
-                //Updating the recommendation count
-                recommendations[nodeID][currentNode].first++;
-
                 //Moving to next step
                 int num_child = graph[currentNode].size();
                 if(num_child > 0){
@@ -163,6 +125,10 @@ void RWR(int nodeID, int num_walks, int num_steps, int num_rec, Randomizer r){
                     //Restart
                     currentNode = graph[nodeID][j];
                 }
+
+                //Updating the recommendation count
+                recommendations[nodeID][currentNode].first += 1;
+
                 step_num++;
             }
         }
@@ -170,10 +136,9 @@ void RWR(int nodeID, int num_walks, int num_steps, int num_rec, Randomizer r){
     processedNodes.push_back(nodeID);
 
     //Sorting nodes based on descending order of recommendations
-    for(int i=0;i<recommendations[nodeID].size();i++){
-        if(i == nodeID || search(nodeID,i)){
-            recommendations[nodeID][i].first = -1;
-        }
+    recommendations[nodeID][nodeID].first = -1;
+    for(int i=0;i<graph[nodeID].size();i++){
+        recommendations[nodeID][graph[nodeID][i]].first = -1;
     }
     sort(recommendations[nodeID].begin(),recommendations[nodeID].end(),customSort);
 }
@@ -192,6 +157,8 @@ int main(int argc, char* argv[]){
     //Only one randomizer object should be used per MPI rank, and all should have same seed
     Randomizer random_generator(seed, num_nodes, restart_prob);
     int rank, size;
+    string outputFile = "output.dat";
+    ofstream file(outputFile, ios::binary | ios::out | ios::trunc);
 
     //Starting MPI pipeline
     MPI_Init(NULL, NULL);
@@ -247,10 +214,8 @@ int main(int argc, char* argv[]){
         }
     }
 
-    string outputFile = "output.dat";
-
     //Handle Output
-    processOutput(num_nodes,num_rec,outputFile);
+    processOutput(num_nodes,num_rec,file);
 
     MPI_Finalize();
 }
