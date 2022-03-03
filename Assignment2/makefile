@@ -1,12 +1,12 @@
 CC=mpic++
-CFLAGS=-std=c++17 -g -Wall -Wextra
+CFLAGS=-std=c++17 -g -Wall -Wextra -O3
 
 NP=4
 DATA=data/8717_31525/edges.dat
 N=8717
 M=31525
 RESTART_PROB=0.1
-NUM_STEPS=5000
+NUM_STEPS=200
 NUM_WALKS=30
 NUM_REC=20
 SEED=369

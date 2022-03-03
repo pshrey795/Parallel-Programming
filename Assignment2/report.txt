@@ -1,3 +1,6 @@
+Note that I have added the -O3 optimization in the makefile. So, the runtimes will be be comparable when the makefile used for evaluation 
+caontains the -O3 optimization flag. 
+
 File 1:
 Number of Nodes = 8717
 Number of Edges = 31525
@@ -17,18 +20,47 @@ Number of MPI Processes:Runtime
 File 2:
 Number of Nodes = 81867
 Number of Edges = 545671
+Number of Steps per walk = 200
+Number of Walks = 30
+Number of Recommendations per node = 20
+Seed = 369
+
+Number of MPI Processes:Runtime
+1: 661.746 seconds
+2: 367.147 seconds
+4: 224.952 seconds
+8: 107.53 seconds
+16: 63.5426 seconds
+
+File 2:
+Number of Nodes = 81867
+Number of Edges = 545671
 Number of Steps per walk = 5000
 Number of Walks = 30
 Number of Recommendations per node = 20
 Seed = 369
 
 Number of MPI Processes:Runtime
-1:
-2:
-4:
-8:
-16:
+1: 2621.52 seconds
+2: 1931.67 seconds
+4: 915.409 seconds
+8: 399.196 seconds
+16: 196.828 seconds
+ 
+File 3:
+Number of Nodes = 82168
+Number of Edges = 870161
+Number of Steps per walk = 200
+Number of Walks = 30
+Number of Recommendations per node = 20
+Seed = 369
 
+Number of MPI Processes:Runtime
+1: 948.146 seconds
+2: 587.491 seconds
+4: 327.186 seconds
+8: 148.218 seconds
+16: 78.3647 seconds 
 
 File 3:
 Number of Nodes = 82168
@@ -39,8 +71,8 @@ Number of Recommendations per node = 20
 Seed = 369
 
 Number of MPI Processes:Runtime
-1:
-2:
-4:
-8:
-16:
+1: 5400.89 seconds
+2: 3800.24 seconds
+4: 2875.76 seconds
+8: 1149.15 seconds
+16: 567.186 seconds
