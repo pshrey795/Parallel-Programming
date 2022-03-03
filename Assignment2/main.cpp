@@ -8,8 +8,7 @@ using namespace std;
 #define MIN_THREADS 2
 
 vector<vector<int>> graph;
-vector<vector<pair<int,int>>> recommendations;
-vector<int> processedNodes; 
+vector<pair<int,int>> recommendations;
 
 //Executed by every thread
 void processInput(string inputFile, int n, int m){
@@ -17,9 +16,7 @@ void processInput(string inputFile, int n, int m){
     graph.resize(n);
     recommendations.resize(n);
     for(int i=0;i<n;i++){
-        for(int j=0;j<n;j++){
-            recommendations[i].push_back(make_pair(0,j));
-        }
+        recommendations[i] = make_pair(0,i);
     }
 
     //Reading big endian input file
@@ -40,53 +37,46 @@ void processInput(string inputFile, int n, int m){
 }
 
 //Every thread outputs its own processed nodes at the proper offset in the output file
-void processOutput(int num_nodes,int num_rec,ofstream& file){
+void processOutput(int i, int num_rec,ofstream& file){
     //Writing to output is done in parallel which means each process writes to that node rows which it processed 
-    for(int i=0;i<processedNodes.size();i++){
-        int currentNode = processedNodes[i];
-        int writeOffset = currentNode * (4 * (1 + 2 * num_rec));
-        
-        //Write outdegree
-        char buffer[4];
-        buffer[0] = (char)(graph[currentNode].size() >> 24 & 0xFF);
-        buffer[1] = (char)(graph[currentNode].size() >> 16 & 0xFF);
-        buffer[2] = (char)(graph[currentNode].size() >> 8 & 0xFF);
-        buffer[3] = (char)(graph[currentNode].size() & 0xFF);
-        file.seekp(writeOffset, ios::beg);
-        file.write(buffer, 4);
+    int currentNode = i;
+    int writeOffset = currentNode * (4 * (1 + 2 * num_rec));
+    
+    //Write outdegree
+    char buffer[4];
+    buffer[0] = (char)(graph[currentNode].size() >> 24 & 0xFF);
+    buffer[1] = (char)(graph[currentNode].size() >> 16 & 0xFF);
+    buffer[2] = (char)(graph[currentNode].size() >> 8 & 0xFF);
+    buffer[3] = (char)(graph[currentNode].size() & 0xFF);
+    file.seekp(writeOffset, ios::beg);
+    file.write(buffer, 4);
 
-        //Writing out the recommendations
-        for(int i=0;i<num_rec;i++){
-            int influenceID = recommendations[currentNode][i].second;
-            int influenceNum = recommendations[currentNode][i].first;
-            if(influenceNum>0){
-                //Print recommendation ID followed by influence number
-                buffer[0] = (char)(influenceID >> 24 & 0xFF);
-                buffer[1] = (char)(influenceID >> 16 & 0xFF);
-                buffer[2] = (char)(influenceID >> 8 & 0xFF);
-                buffer[3] = (char)(influenceID & 0xFF);
-                file.write(buffer, 4);
-                buffer[0] = (char)(influenceNum >> 24 & 0xFF);
-                buffer[1] = (char)(influenceNum >> 16 & 0xFF);
-                buffer[2] = (char)(influenceNum >> 8 & 0xFF);
-                buffer[3] = (char)(influenceNum & 0xFF);
-                file.write(buffer, 4);
-            }else{
-                //Print NULL if this node cannot be recommended
-                buffer[0] = 'N';
-                buffer[1] = 'U';
-                buffer[2] = 'L';
-                buffer[3] = 'L';
-                file.write(buffer, 4);
-                file.write(buffer, 4);
-            }
+    //Writing out the recommendations
+    for(int i=0;i<num_rec;i++){
+        int influenceID = recommendations[i].second;
+        int influenceNum = recommendations[i].first;
+        if(influenceNum>0){
+            //Print recommendation ID followed by influence number
+            buffer[0] = (char)(influenceID >> 24 & 0xFF);
+            buffer[1] = (char)(influenceID >> 16 & 0xFF);
+            buffer[2] = (char)(influenceID >> 8 & 0xFF);
+            buffer[3] = (char)(influenceID & 0xFF);
+            file.write(buffer, 4);
+            buffer[0] = (char)(influenceNum >> 24 & 0xFF);
+            buffer[1] = (char)(influenceNum >> 16 & 0xFF);
+            buffer[2] = (char)(influenceNum >> 8 & 0xFF);
+            buffer[3] = (char)(influenceNum & 0xFF);
+            file.write(buffer, 4);
+        }else{
+            //Print NULL if this node cannot be recommended
+            buffer[0] = 'N';
+            buffer[1] = 'U';
+            buffer[2] = 'L';
+            buffer[3] = 'L';
+            file.write(buffer, 4);
+            file.write(buffer, 4);
         }
     }
-}
-
-void processTextOutput(int num_nodes,int num_rec,string outputFile){
-    ofstream file(outputFile, ios::out | ios::trunc);
-
 }
 
 //Custom sort function to sort the recommendations in descending order
@@ -101,9 +91,12 @@ bool customSort(pair<int,int> p1,pair<int,int> p2){
 }
 
 //Main Random Walk
-void RWR(int nodeID, int num_walks, int num_steps, int num_rec, Randomizer r){
+void RWR(int nodeID, int num_walks, int num_steps, Randomizer r){
     //Actual RWR
     int currentNode;
+    for(int i=0;i<recommendations.size();i++){
+        recommendations[i] = make_pair(0,i);
+    }
     for(int j=0;j<graph[nodeID].size();j++){
         for(int k=0;k<num_walks;k++){
             int step_num = 0;
@@ -127,20 +120,19 @@ void RWR(int nodeID, int num_walks, int num_steps, int num_rec, Randomizer r){
                 }
 
                 //Updating the recommendation count
-                recommendations[nodeID][currentNode].first += 1;
+                recommendations[currentNode].first += 1;
 
                 step_num++;
             }
         }
     }
-    processedNodes.push_back(nodeID);
 
     //Sorting nodes based on descending order of recommendations
-    recommendations[nodeID][nodeID].first = -1;
+    recommendations[nodeID].first = -1;
     for(int i=0;i<graph[nodeID].size();i++){
-        recommendations[nodeID][graph[nodeID][i]].first = -1;
+        recommendations[graph[nodeID][i]].first = -1;
     }
-    sort(recommendations[nodeID].begin(),recommendations[nodeID].end(),customSort);
+    sort(recommendations.begin(),recommendations.end(),customSort);
 }
 
 int main(int argc, char* argv[]){
@@ -160,6 +152,9 @@ int main(int argc, char* argv[]){
     string outputFile = "output.dat";
     ofstream file(outputFile, ios::binary | ios::out | ios::trunc);
 
+    //To obtain the time taken by the program
+    auto start = std::chrono::high_resolution_clock::now();
+
     //Starting MPI pipeline
     MPI_Init(NULL, NULL);
     
@@ -177,7 +172,8 @@ int main(int argc, char* argv[]){
         int start_node = rank*num_nodes_per_thread;
         int end_node = min((rank+1)*num_nodes_per_thread,num_nodes);
         for(int i=start_node;i<end_node;i++){
-            RWR(i,num_walks,num_steps,num_rec,random_generator);
+            RWR(i,num_walks,num_steps,random_generator);
+            processOutput(i,num_rec,file);
         }
     }else{
         //Master-Worker scheduling
@@ -208,14 +204,23 @@ int main(int argc, char* argv[]){
                     //Time to exit
                     break;
                 }else{
-                    RWR(index,num_walks,num_steps,num_rec,random_generator);
+                    RWR(index,num_walks,num_steps,random_generator);
+                    processOutput(index,num_rec,file);
                 }
             }
         }
     }
 
-    //Handle Output
-    processOutput(num_nodes,num_rec,file);
-
     MPI_Finalize();
+
+    //Close File
+    file.close();
+
+    //End time
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = end-start;
+    if(rank==0){
+        cout<<"Time taken by the program: "<<diff.count()<<" seconds"<<endl;
+    }
+    return 0;
 }

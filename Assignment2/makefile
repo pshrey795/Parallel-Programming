@@ -1,7 +1,28 @@
-compile:
-	mpic++ -std=c++17 -o wtf *.cpp librandomizer.a
-run:
-	mpirun -np 4 ./wtf data/8717_31525/edges.dat 8717 31525 0.1 200 50 40 369
+CC=mpic++
+CFLAGS=-std=c++17 -g -Wall -Wextra
+
+NP=4
+DATA=data/8717_31525/edges.dat
+N=8717
+M=31525
+RESTART_PROB=0.1
+NUM_STEPS=5000
+NUM_WALKS=30
+NUM_REC=20
+SEED=369
+
+sources=main.cpp
+objects=$(sources:.cpp=.o)
+
+compile: $(objects) librandomizer.a
+	$(CC) $(CFLAGS) -o $@ $^
+
+run: compile
+	mpirun -np $(NP) ./compile $(DATA) $(N) $(M) $(RESTART_PROB) $(NUM_STEPS) $(NUM_WALKS) $(NUM_REC) $(SEED) -o output.txt
+
+%.o: %.cpp *.hpp
+	$(CC) $(CFLAGS) -c $<
+
 clean:
-	rm -f wtf
+	rm -f compile $(objects)
 	rm -f output.dat

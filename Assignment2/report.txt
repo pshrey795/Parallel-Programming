@@ -1,0 +1,46 @@
+File 1:
+Number of Nodes = 8717
+Number of Edges = 31525
+Number of Steps per walk = 5000
+Number of Walks = 30
+Number of Recommendations per node = 20
+Seed = 369
+
+Number of MPI Processes:Runtime
+1: 46.9574 seconds
+2: 25.9577 seconds
+4: 19.0593 seconds
+8: 9.25575 seconds
+16: 5.94479 seconds
+
+
+File 2:
+Number of Nodes = 81867
+Number of Edges = 545671
+Number of Steps per walk = 5000
+Number of Walks = 30
+Number of Recommendations per node = 20
+Seed = 369
+
+Number of MPI Processes:Runtime
+1:
+2:
+4:
+8:
+16:
+
+
+File 3:
+Number of Nodes = 82168
+Number of Edges = 870161
+Number of Steps per walk = 5000
+Number of Walks = 30
+Number of Recommendations per node = 20
+Seed = 369
+
+Number of MPI Processes:Runtime
+1:
+2:
+4:
+8:
+16:
